@@ -6,6 +6,8 @@ const lines = code.split("\n");
 
 const variables = {};
 
+let currentLinehandled = 0;
+
 const isDeclaration = (line) => {
   let copy = line;
 
@@ -18,7 +20,7 @@ const error = (message) => {
 };
 
 const ensureValidValue = (candidateValue) => {
-  if (!isNaN(value) || isNumber(value)) {
+  if (!isNaN(candidateValue) || isNumber(candidateValue)) {
     return true;
   }
   const validStringCharacters = ["'", '"', "`"];
@@ -50,26 +52,33 @@ const declareVariable = (name, value) => {
   variables[name] = { value, type: "string" };
 };
 
-const handleDeclaration = (line, lineNumber) => {
+const handleDeclaration = (line) => {
   line = line.replace("yo ", "");
   line = line.replace(/\s/g, "");
 
   const i = line.indexOf("=");
-  const [variableName, value] = [line.slice(0, i), line.slice(i + 1)];
+  const variableName = line.slice(0, i);
+  let value = line.slice(i + 1);
 
+  if (variables[value]) {
+    // variable already exists
+    variables[variableName] = variables[value];
+    return;
+  }
   if (!variableName) {
-    error(`Error on line ${lineNumber + 1}, definition without varaible`);
+    error(
+      `Error on line ${currentLinehandled + 1}, definition without variable.`
+    );
   }
 
+  ensureValidValue(value);
   declareVariable(variableName, value);
 };
 
-lines.forEach((line) => {
-  console.log(line);
+lines.forEach((line, lineCount) => {
+  currentLinehandled = lineCount;
 
   if (isDeclaration(line)) {
     handleDeclaration(line);
   }
 });
-
-console.log(variables);

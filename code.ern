@@ -1,2 +1,3 @@
 yo a = 1
 yo b = "isak"
+yo c = b
